@@ -1,10 +1,7 @@
 import os from "node:os";
-import type { WASocket } from "baileys";
-import { config } from "../config/config.js";
 import { converter } from "../library/converter.js";
-import { Command, userService } from "../library/index.js";
+import { userService } from "../library/index.js";
 import { getAllCommands } from "../modules/plugin-loader.js";
-import { BaseCommand, type MessageData } from "../types/index.js";
 
 const startTime = new Date();
 

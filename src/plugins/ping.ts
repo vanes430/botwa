@@ -1,7 +1,3 @@
-import type { WASocket } from "baileys";
-import { Command } from "../library/index.js";
-import { BaseCommand, type MessageData } from "../types/index.js";
-
 @Command({
   name: "ping",
   alias: ["p"],

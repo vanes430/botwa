@@ -4,6 +4,7 @@
 // All bot logic is in src/bot.ts
 // ============================================
 
+import "./src/library/globals.js";
 import { garbageCollector, initFileLogger, logger } from "./src/library/index.js";
 import { loadPlugins, watchPlugins } from "./src/modules/index.js";
 import { startBot } from "./src/bot.js";

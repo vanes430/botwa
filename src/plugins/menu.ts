@@ -1,8 +1,5 @@
-import type { WASocket } from "baileys";
-import { config } from "../config/config.js";
-import { Command, userService } from "../library/index.js";
+import { userService } from "../library/index.js";
 import { getCategories, getCategoryMeta, getGroupedCommands } from "../modules/plugin-loader.js";
-import { BaseCommand, type MessageData } from "../types/index.js";
 
 @Command({
   name: "menu",

@@ -1,7 +1,4 @@
-import type { WASocket } from "baileys";
 import { converter } from "../library/converter.js";
-import { Command } from "../library/index.js";
-import { BaseCommand, type MessageData } from "../types/index.js";
 
 @Command({
   name: "uppercase",

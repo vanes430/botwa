@@ -1,6 +1,4 @@
-import type { WASocket } from "baileys";
-import { Command, MultiFileDatabase } from "../library/index.js";
-import { BaseCommand, type MessageData } from "../types/index.js";
+import { MultiFileDatabase } from "../library/index.js";
 
 interface UserStats {
   userId: string;
