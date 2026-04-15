@@ -1,24 +1,23 @@
 import type { WASocket } from "baileys";
 import { converter } from "../library/converter.js";
-import type { MessageData, PluginCommand } from "../types/index.js";
+import { Command } from "../library/index.js";
+import { BaseCommand, type MessageData } from "../types/index.js";
 
-async function execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
-  const text = args.join(" ");
-
-  if (text === "") {
-    await sock.sendMessage(m.from, { text: "Usage: .uppercase <text>" });
-    return;
-  }
-
-  const result = converter.toUpperCase(text);
-  await sock.sendMessage(m.from, { text: result });
-}
-
-export const command: PluginCommand = {
+@Command({
   name: "uppercase",
-  alias: ["upper"],
+  alias: ["up"],
   category: "tools",
   description: "Convert text to uppercase",
-  usage: ".uppercase hello world",
-  execute,
-};
+  usage: ".uppercase <text>",
+})
+export default class UppercaseCommand extends BaseCommand {
+  public async execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
+    if (args.length === 0) {
+      await sock.sendMessage(m.from, { text: "Please provide text to convert." });
+      return;
+    }
+
+    const text = args.join(" ");
+    await sock.sendMessage(m.from, { text: converter.toUpperCase(text) });
+  }
+}

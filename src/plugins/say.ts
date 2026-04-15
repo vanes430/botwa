@@ -1,22 +1,21 @@
 import type { WASocket } from "baileys";
-import type { MessageData, PluginCommand } from "../types/index.js";
+import { Command } from "../library/index.js";
+import { BaseCommand, type MessageData } from "../types/index.js";
 
-async function execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
-  const text = args.join(" ");
-
-  if (text === "") {
-    await sock.sendMessage(m.from, { text: "Usage: .say <text>" });
-    return;
-  }
-
-  await sock.sendMessage(m.from, { text });
-}
-
-export const command: PluginCommand = {
+@Command({
   name: "say",
-  alias: ["echo"],
   category: "tools",
-  description: "Bot will repeat your message",
-  usage: ".say hello world",
-  execute,
-};
+  description: "Repeat the message provided",
+  usage: ".say <text>",
+})
+export default class SayCommand extends BaseCommand {
+  public async execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
+    if (args.length === 0) {
+      await sock.sendMessage(m.from, { text: "Please provide a message to repeat." });
+      return;
+    }
+
+    const text = args.join(" ");
+    await sock.sendMessage(m.from, { text });
+  }
+}

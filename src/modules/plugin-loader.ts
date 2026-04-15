@@ -1,7 +1,7 @@
 import { readdir, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { logger } from "../library/logger.js";
-import type { PluginCommand } from "../types/index.js";
+import type { BaseCommand, PluginCommand } from "../types/index.js";
 import { registerPlugin } from "./plugin-registry.js";
 import { validatePlugin } from "./plugin-validator.js";
 
@@ -47,14 +47,33 @@ async function loadPlugins(pluginsDir: string): Promise<void> {
       const modulePath = filePath.startsWith("file://") ? filePath : `file://${filePath}`;
       const pluginModule = (await import(modulePath)) as Record<string, unknown>;
 
-      const validation = validatePlugin(pluginModule, file);
-      if (!validation.valid) {
-        logger.warn(`Skipping ${file}: ${validation.errors.join(", ")}`);
-        failedCount += 1;
-        continue;
+      let pluginCommand: PluginCommand | undefined;
+
+      // Cek apakah itu Decorator-based (Default Export adalah Class)
+      if (typeof pluginModule.default === "function") {
+        const CommandClass = pluginModule.default as new () => BaseCommand;
+        const instance = new CommandClass();
+        const metadata = (instance as { metadata?: PluginCommand }).metadata;
+
+        if (metadata !== undefined) {
+          pluginCommand = {
+            ...metadata,
+            execute: instance.execute.bind(instance),
+          };
+        }
       }
 
-      const pluginCommand = (pluginModule as { command: PluginCommand }).command;
+      // Fallback ke Object-based (export const command)
+      if (pluginCommand === undefined) {
+        const validation = validatePlugin(pluginModule, file);
+        if (!validation.valid) {
+          logger.warn(`Skipping ${file}: ${validation.errors.join(", ")}`);
+          failedCount += 1;
+          continue;
+        }
+        pluginCommand = (pluginModule as { command: PluginCommand }).command;
+      }
+
       registerPlugin(pluginCommand);
       loadedCount += 1;
 

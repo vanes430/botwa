@@ -35,6 +35,20 @@ export interface PluginCommand {
   execute: (sock: WASocket, m: MessageData, args: string[]) => Promise<void> | void;
 }
 
+/**
+ * Abstract class untuk semua plugin command berbasis Class/Decorator.
+ * Pengembang akan meng-extend class ini.
+ */
+export abstract class BaseCommand {
+  // Metadata akan otomatis terisi oleh Decorator @Command
+  public metadata!: PluginCommand;
+
+  /**
+   * Fungsi utama yang dijalankan saat command dipanggil.
+   */
+  public abstract execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> | void;
+}
+
 export interface CooldownMap {
   get(key: string): number | undefined;
   set(key: string, value: number): void;

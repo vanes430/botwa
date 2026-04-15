@@ -3,6 +3,7 @@ export { type CommandTask, commandQueue } from "./command-queue.js";
 export { converter } from "./converter.js";
 export type { Collection, DatabaseOptions, MapEntry } from "./database.js";
 export { MultiFileDatabase } from "./database.js";
+export { Command, type CommandMetadata } from "./decorators.js";
 export type { FileLoggerOptions } from "./file-logger.js";
 export { initFileLogger } from "./file-logger.js";
 export { functions } from "./functions.js";

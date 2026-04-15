@@ -14,7 +14,7 @@ async function handleMessage(sock: WASocket, data: MessageData): Promise<void> {
     return;
   }
 
-  const { prefix, command, args } = parsed;
+  const { command, args } = parsed;
   const cmd = getCommand(command);
 
   if (cmd === undefined) {
