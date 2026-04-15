@@ -16,7 +16,7 @@ const startTime = new Date();
   usage: ".status",
   isOwner: true,
 })
-export default class StatusCommand extends BaseCommand {
+export default class extends BaseCommand {
   public async execute(sock: WASocket, m: MessageData): Promise<void> {
     const commands = getAllCommands();
     const pluginCount = commands.length;

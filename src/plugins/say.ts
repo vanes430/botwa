@@ -8,7 +8,7 @@ import { BaseCommand, type MessageData } from "../types/index.js";
   description: "Repeat the message provided",
   usage: ".say <text>",
 })
-export default class SayCommand extends BaseCommand {
+export default class extends BaseCommand {
   public async execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
     if (args.length === 0) {
       await sock.sendMessage(m.from, { text: "Please provide a message to repeat." });

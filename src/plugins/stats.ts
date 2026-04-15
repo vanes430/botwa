@@ -20,7 +20,7 @@ const stats = db.collection<UserStats>("user-stats");
   description: "Show command usage stats for a user",
   usage: ".stats [@mention or number]",
 })
-export default class StatsCommand extends BaseCommand {
+export default class extends BaseCommand {
   public async execute(sock: WASocket, m: MessageData, args: string[]): Promise<void> {
     const target = args.length > 0 ? args[0]! : m.sender;
     const userId = target.replace(/[^0-9]/g, "");

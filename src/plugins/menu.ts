@@ -11,7 +11,7 @@ import { BaseCommand, type MessageData } from "../types/index.js";
   description: "Show all available commands",
   usage: ".menu",
 })
-export default class MenuCommand extends BaseCommand {
+export default class extends BaseCommand {
   public async execute(sock: WASocket, m: MessageData): Promise<void> {
     const grouped = getGroupedCommands();
     const categories = getCategories();
@@ -19,7 +19,7 @@ export default class MenuCommand extends BaseCommand {
 
     const userStats = await userService.getStats(m.sender);
 
-    // Sort categories by display order
+    // Sort categories
     const order = [
       "general",
       "tools",
@@ -50,12 +50,10 @@ export default class MenuCommand extends BaseCommand {
     menuText += `┃ 📊 Usage: *${userStats.commandCount}* cmds\n`;
     menuText += `╰━━━━━━━━━━━━━━━┈⊷\n\n`;
 
-    // Build each category
     for (const category of sortedCategories) {
       const meta = getCategoryMeta(category);
       const cmds = grouped.get(category) ?? [];
 
-      // Sort commands
       cmds.sort((a, b): number => {
         const aWeight = (a.command.isOwner ? 100 : 0) + (a.command.isAdmin ? 10 : 0);
         const bWeight = (b.command.isOwner ? 100 : 0) + (b.command.isAdmin ? 10 : 0);
@@ -67,11 +65,8 @@ export default class MenuCommand extends BaseCommand {
         const cmd = entry.command;
         const aliasText =
           cmd.alias !== undefined && cmd.alias.length > 0 ? ` (${cmd.alias.join(", ")})` : "";
-
         const badges = [...entry.badges];
-        if (cmd.isAdmin) {
-          badges.push("👑");
-        }
+        if (cmd.isAdmin) badges.push("👑");
         const badgeText = badges.length > 0 ? ` ${badges.join("")}` : "";
 
         menuText += `┃ ◦ ${cmd.name}${aliasText}${badgeText}\n`;
@@ -80,7 +75,6 @@ export default class MenuCommand extends BaseCommand {
       menuText += `╰━━━━━━━━━━━━━━━┈⊷\n\n`;
     }
 
-    // Footer
     menuText += `💡 _Usage: ${config.prefix[0]}<command> [args]_\n`;
     menuText += `🔒=Owner | 👥=Group | 👑=Admin`;
 

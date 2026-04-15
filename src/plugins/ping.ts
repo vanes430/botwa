@@ -9,7 +9,7 @@ import { BaseCommand, type MessageData } from "../types/index.js";
   description: "Check bot response time",
   usage: ".ping",
 })
-export default class PingCommand extends BaseCommand {
+export default class extends BaseCommand {
   public async execute(sock: WASocket, m: MessageData): Promise<void> {
     const start = Date.now();
     await sock.sendMessage(m.from, { react: { text: "⏳", key: m.key } });
