@@ -21,8 +21,6 @@ class GlobalQueue {
   private queue: CommandTask[] = [];
   private isProcessing = false;
 
-  constructor() {}
-
   /**
    * Menambahkan tugas baru ke dalam antrian
    */
