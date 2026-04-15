@@ -7,6 +7,8 @@ import type {
 } from "./index.js";
 import type { config as _config } from "../config/config.js";
 import type { logger as _logger } from "../library/logger.js";
+import type { globalQueue as _globalQueue } from "../library/global-queue.js";
+import type { sessionManager as _sessionManager } from "../library/session-manager.js";
 
 declare global {
   // Types
@@ -20,4 +22,6 @@ declare global {
   const BaseCommand: typeof _BaseCommand;
   const config: typeof _config;
   const logger: typeof _logger;
+  const globalQueue: typeof _globalQueue;
+  const sessionManager: typeof _sessionManager;
 }

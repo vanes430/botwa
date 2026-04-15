@@ -2,6 +2,9 @@ import type { WASocket } from "baileys";
 import type { MessageData } from "../types/index.js";
 import { logger } from "./logger.js";
 
+/**
+ * Task yang masuk ke dalam antrian global bot.
+ */
 export interface CommandTask {
   sock: WASocket;
   data: MessageData;
@@ -9,9 +12,16 @@ export interface CommandTask {
   execute: () => Promise<void>;
 }
 
-class CommandQueue {
+/**
+ * GlobalQueue: Sistem antrian perintah global bot (FIFO).
+ * Menjamin bot hanya mengeksekusi satu perintah dalam satu waktu agar lebih humanized.
+ * Pengembang dapat mengakses ini secara global via `globalQueue`.
+ */
+class GlobalQueue {
   private queue: CommandTask[] = [];
   private isProcessing = false;
+
+  constructor() {}
 
   /**
    * Menambahkan tugas baru ke dalam antrian
@@ -66,4 +76,4 @@ class CommandQueue {
   }
 }
 
-export const commandQueue = new CommandQueue();
+export const globalQueue = new GlobalQueue();

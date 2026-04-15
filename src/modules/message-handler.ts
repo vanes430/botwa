@@ -1,8 +1,6 @@
 import type { WASocket } from "baileys";
 import { config } from "../config/config.js";
-import { commandQueue, functions, logger, sessionManager } from "../library/index.js";
-import { trackCommand } from "../plugins/stats.js";
-import type { MessageData, PluginCommand } from "../types/index.js";
+import { functions, trackCommand } from "../plugins/stats.js";
 import { getCommand } from "./plugin-loader.js";
 
 const cooldowns = new Map<string, number>();
@@ -13,7 +11,7 @@ async function handleMessage(sock: WASocket, data: MessageData): Promise<void> {
   if (session !== undefined) {
     const cmd = getCommand(session.pluginName);
     if (cmd !== undefined) {
-      commandQueue.enqueue({
+      globalQueue.enqueue({
         sock,
         data,
         commandName: `session:${session.pluginName}`,
@@ -69,7 +67,7 @@ async function handleMessage(sock: WASocket, data: MessageData): Promise<void> {
   }
 
   // Add to global queue
-  commandQueue.enqueue({
+  globalQueue.enqueue({
     sock,
     data,
     commandName: command,
