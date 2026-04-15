@@ -1,0 +1,37 @@
+export interface BotConfig {
+  botNumber: string;
+  ownerNumber: string[];
+  prefix: string[];
+  botName: string;
+  sessionName: string;
+  cooldown: number;
+  maxRetries: number;
+  autoRead: boolean;
+  autoTyping: boolean;
+  alwaysOnline: boolean;
+  selfCommand: boolean;
+  antiCall: boolean;
+  usePairingCode: boolean;
+  baileysLogLevel: "trace" | "debug" | "info" | "warn" | "error" | "silent";
+  rawMessageLog: boolean;
+  rawBaileysLog: boolean;
+}
+
+export const config: Readonly<BotConfig> = Object.freeze({
+  botNumber: "6281226485398",
+  ownerNumber: ["6281226485398"],
+  prefix: [".", "!", "#", "/"],
+  botName: "WhatsApp Bot",
+  sessionName: "./auth_session",
+  cooldown: 3000,
+  maxRetries: 3,
+  autoRead: true,
+  autoTyping: true,
+  alwaysOnline: false,
+  selfCommand: true,
+  antiCall: false,
+  usePairingCode: true,
+  baileysLogLevel: "silent",
+  rawMessageLog: false,
+  rawBaileysLog: false,
+});

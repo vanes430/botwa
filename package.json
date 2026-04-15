@@ -1,0 +1,25 @@
+{
+  "name": "botwa",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "lint": "biome check ./src",
+    "format": "biome check --write ./src"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.12",
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "baileys": "github:naruyaizumi/baileys"
+  },
+  "trustedDependencies": [
+    "baileys",
+    "protobufjs"
+  ]
+}
