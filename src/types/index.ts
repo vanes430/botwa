@@ -55,3 +55,14 @@ export interface CooldownMap {
   delete(key: string): boolean;
   has(key: string): boolean;
 }
+
+/**
+ * Interface untuk data sesi interaktif (State Machine)
+ */
+export interface SessionData {
+  id: string; // sender id
+  pluginName: string; // nama plugin yang memegang sesi
+  state: string; // state saat ini (misal: 'awaiting_resolution')
+  data: Record<string, unknown>; // data tambahan untuk disimpan dalam sesi
+  expiresAt: number; // timestamp kapan sesi ini berakhir
+}

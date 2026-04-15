@@ -1,6 +1,6 @@
 import type { WASocket } from "baileys";
 import { config } from "../config/config.js";
-import { commandQueue, functions, logger } from "../library/index.js";
+import { commandQueue, functions, logger, sessionManager } from "../library/index.js";
 import { trackCommand } from "../plugins/stats.js";
 import type { MessageData, PluginCommand } from "../types/index.js";
 import { getCommand } from "./plugin-loader.js";
@@ -8,6 +8,24 @@ import { getCommand } from "./plugin-loader.js";
 const cooldowns = new Map<string, number>();
 
 async function handleMessage(sock: WASocket, data: MessageData): Promise<void> {
+  // 1. Check for active session
+  const session = sessionManager.get(data.sender);
+  if (session !== undefined) {
+    const cmd = getCommand(session.pluginName);
+    if (cmd !== undefined) {
+      commandQueue.enqueue({
+        sock,
+        data,
+        commandName: `session:${session.pluginName}`,
+        execute: async () => {
+          await executeCommand(sock, data, cmd, [], `session:${session.pluginName}`);
+        },
+      });
+      return;
+    }
+  }
+
+  // 2. Regular command parsing
   const parsed = functions.parseCommand(data.body);
 
   if (parsed === null) {

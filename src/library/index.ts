@@ -7,5 +7,7 @@ export { Command, type CommandMetadata } from "./decorators.js";
 export type { FileLoggerOptions } from "./file-logger.js";
 export { initFileLogger } from "./file-logger.js";
 export { functions } from "./functions.js";
+export { garbageCollector } from "./garbage-collector.js";
 export { logger } from "./logger.js";
+export { sessionManager } from "./session-manager.js";
 export { type UserStats, userService } from "./user-service.js";

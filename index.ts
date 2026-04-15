@@ -4,12 +4,14 @@
 // All bot logic is in src/bot.ts
 // ============================================
 
-import { logger, initFileLogger } from "./src/library/index.js";
+import { garbageCollector, initFileLogger, logger } from "./src/library/index.js";
 import { loadPlugins, watchPlugins } from "./src/modules/index.js";
 import { startBot } from "./src/bot.js";
 
 async function main(): Promise<void> {
   initFileLogger({ logDir: "./logs", maxFiles: 10, maxFileSizeKB: 5120 });
+  garbageCollector.start();
+
 
   logger.info("Starting WhatsApp Bot...");
   await loadPlugins("./src/plugins");
