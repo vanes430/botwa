@@ -1,3 +1,4 @@
+import util from "node:util";
 import type { Boom } from "@hapi/boom";
 import makeWASocket, {
   type AuthenticationState,
@@ -69,13 +70,82 @@ async function startBot(): Promise<void> {
   pairingCodeRequested = false;
   groupCache = new Map<string, string>();
 
+  // Aggressive Monkey Patch to suppress Baileys/Libsignal logs
+  const filter = (chunk: string | Uint8Array): boolean => {
+    const str = chunk?.toString() || "";
+    return (
+      str.includes("Closing session") || str.includes("SessionEntry") || str.includes("_chains")
+    );
+  };
+
+  const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+  const originalStderrWrite = process.stderr.write.bind(process.stderr);
+
+  // @ts-expect-error - Overriding complex signature
+  process.stdout.write = (
+    chunk: string | Uint8Array,
+    encoding?: string | ((err?: Error | null | undefined) => void),
+    callback?: (err?: Error | null | undefined) => void
+  ) => {
+    if (filter(chunk)) return true;
+    return originalStdoutWrite(
+      chunk,
+      encoding as string,
+      callback as (err?: Error | null | undefined) => void
+    );
+  };
+
+  // @ts-expect-error - Overriding complex signature
+  process.stderr.write = (
+    chunk: string | Uint8Array,
+    encoding?: string | ((err?: Error | null | undefined) => void),
+    callback?: (err?: Error | null | undefined) => void
+  ) => {
+    if (filter(chunk)) return true;
+    return originalStderrWrite(
+      chunk,
+      encoding as string,
+      callback as (err?: Error | null | undefined) => void
+    );
+  };
+
+  // Specifically patch console.info since libsignal uses it
+  const originalInfo = console.info;
+  console.info = (...args: unknown[]) => {
+    if (args.length > 0 && typeof args[0] === "string" && args[0].includes("Closing session")) {
+      return;
+    }
+    originalInfo(...args);
+  };
+
+  // Patch util.inspect as Baileys might be using it to dump the object
+  const originalInspect = util.inspect;
+  // @ts-expect-error - Overriding complex signature
+  util.inspect = (obj: unknown, options?: util.InspectOptions) => {
+    if (
+      obj &&
+      typeof obj === "object" &&
+      (obj.constructor?.name === "SessionEntry" || "_chains" in obj)
+    ) {
+      return "";
+    }
+    return originalInspect(obj, options);
+  };
+
   const { state, saveCreds }: { state: AuthenticationState; saveCreds: () => Promise<void> } =
     await useMultiFileAuthState(config.sessionName);
+
+  // Menggunakan logger pino dengan level dari config untuk meredam log internal Baileys
+  const baileysLogger = pino({
+    level: config.baileysLogLevel || "silent",
+    // Mencegah output objek yang terlalu verbose ke console
+    enabled: config.baileysLogLevel !== "silent",
+  });
 
   const sock: WASocket = makeWASocket({
     auth: state,
     browser: Browsers.windows("Chrome"),
-    logger: pino({ level: config.baileysLogLevel }).child({ class: "baileys" }),
+    logger: baileysLogger,
   });
 
   sock.ev.on("creds.update", saveCreds);

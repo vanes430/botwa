@@ -52,10 +52,10 @@ async function loadPlugins(pluginsDir: string): Promise<void> {
       // Cek apakah itu Decorator-based (Default Export adalah Class)
       if (typeof pluginModule.default === "function") {
         const CommandClass = pluginModule.default as new () => BaseCommand;
-        const instance = new CommandClass();
-        const metadata = (instance as { metadata?: PluginCommand }).metadata;
+        const metadata = (CommandClass.prototype as { metadata?: PluginCommand }).metadata;
 
         if (metadata !== undefined) {
+          const instance = new CommandClass();
           pluginCommand = {
             ...metadata,
             execute: instance.execute.bind(instance),
@@ -72,6 +72,12 @@ async function loadPlugins(pluginsDir: string): Promise<void> {
           continue;
         }
         pluginCommand = (pluginModule as { command: PluginCommand }).command;
+      }
+
+      if (pluginCommand === undefined) {
+        logger.warn(`Skipping ${file}: No valid plugin export found.`);
+        failedCount += 1;
+        continue;
       }
 
       registerPlugin(pluginCommand);

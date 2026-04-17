@@ -11,6 +11,15 @@ function validatePlugin(plugin: unknown, fileName: string): ValidationResult {
   }
 
   const mod = plugin as Record<string, unknown>;
+
+  // Check for Class-based (Default Export)
+  if (typeof mod.default === "function") {
+    // Basic validation for class-based will be handled by the loader
+    // by checking the metadata on the instance.
+    return { valid: true, errors: [] };
+  }
+
+  // Fallback to Object-based (export const command)
   const cmd = mod.command;
 
   if (cmd === undefined) {

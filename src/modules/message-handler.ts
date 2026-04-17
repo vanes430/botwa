@@ -1,6 +1,7 @@
 import type { WASocket } from "baileys";
 import { config } from "../config/config.js";
-import { functions, trackCommand } from "../plugins/stats.js";
+import { functions } from "../library/index.js";
+import { trackCommand } from "../plugins/stats.js";
 import { getCommand } from "./plugin-loader.js";
 
 const cooldowns = new Map<string, number>();
@@ -108,13 +109,26 @@ async function executeCommand(
     }
   }
 
-  // 2. Human-like typing indicator
+  // 2. Human-like behaviors (mark as read & typing)
+  if (config.autoRead === true) {
+    const readDelay = functions.getRandomDelay(2000, 4000);
+    await functions.sleep(readDelay);
+    await sock.readMessages([data.key]);
+  }
+
   if (config.autoTyping === true) {
+    const thinkingDelay = functions.getRandomDelay(400, 750);
+    await functions.sleep(thinkingDelay);
+
     await sock.sendPresenceUpdate("composing", data.from);
-    const typingDelay = functions.getRandomDelay(1000, 3000);
+
+    const typingDelay = functions.getRandomDelay(1500, 2500);
     await functions.sleep(typingDelay);
+
     await sock.sendPresenceUpdate("paused", data.from);
-    await functions.sleep(functions.getRandomDelay(300, 800));
+
+    const postTypingDelay = functions.getRandomDelay(500, 1000);
+    await functions.sleep(postTypingDelay);
   }
 
   // 3. Set cooldown and execute
@@ -123,7 +137,7 @@ async function executeCommand(
   try {
     await cmd.execute(sock, data, args);
     await trackCommand(data);
-    logger.info(`[Worker] Done: ${commandName} by ${data.sender}`);
+    logger.info(`[Worker] DONE: ${commandName} by ${data.sender}`);
   } catch (error: unknown) {
     logger.error(`[Worker] Error executing ${commandName}`, {
       error: error instanceof Error ? error.message : String(error),

@@ -9,5 +9,6 @@ export { functions } from "./functions.js";
 export { garbageCollector } from "./garbage-collector.js";
 export { type CommandTask, globalQueue } from "./global-queue.js";
 export { logger } from "./logger.js";
+export { presenceManager } from "./presence-manager.js";
 export { sessionManager } from "./session-manager.js";
 export { type UserStats, userService } from "./user-service.js";

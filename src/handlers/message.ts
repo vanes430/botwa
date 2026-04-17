@@ -1,6 +1,7 @@
 import type { BaileysEventMap, WASocket } from "baileys";
+import { config } from "../config/config.js";
 import { printMessageLog } from "../core/connection-logic.js";
-import { functions } from "../library/index.js";
+import { functions, presenceManager } from "../library/index.js";
 import { handleMessage, transformMessagesUpsert } from "../modules/index.js";
 
 /**
@@ -16,18 +17,25 @@ export async function setupMessageUpsert(
 
     if (message === undefined) return;
 
-    // Human-like auto-read
+    // Trigger Smart Presence: Bot becomes online for 5 minutes
+    if (config.alwaysOnline === false) {
+      void presenceManager.update(sock);
+    }
+
+    const body = functions.extractMessageText(message.message);
+    if (body !== "" && message.message !== undefined && resolved.type === "notify") {
+      await printMessageLog(sock, message, functions, getGroupName);
+    }
+
+    // Human-like auto-read in background
     if (message.key.id !== undefined && config.autoRead === true) {
-      await functions.sleep(functions.getRandomDelay(2000, 4000));
-      await sock.readMessages([message.key]);
+      void (async () => {
+        await functions.sleep(functions.getRandomDelay(4000, 6000));
+        await sock.readMessages([message.key]);
+      })();
     }
 
     if (message.message === undefined || resolved.type !== "notify") return;
-
-    const body = functions.extractMessageText(message.message);
-    if (body !== "") {
-      await printMessageLog(sock, message, functions, getGroupName);
-    }
 
     const from = message.key.remoteJid ?? "";
     const sender = message.key.participant || from;
