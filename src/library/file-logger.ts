@@ -33,6 +33,17 @@ class FileLogger {
     this.maxFileSizeKB = options.maxFileSizeKB ?? DEFAULT_MAX_SIZE_KB;
 
     this.ensureLogDir();
+    this.rotateOnStartup();
+  }
+
+  private rotateOnStartup(): void {
+    if (existsSync(this.latestLog)) {
+      const size = this.getFileSize(this.latestLog);
+      if (size > 0) {
+        logger.info("Found existing log file, rotating for new session...");
+        this.rotate();
+      }
+    }
   }
 
   private ensureLogDir(): void {
