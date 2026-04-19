@@ -36,6 +36,9 @@ export const config: Readonly<BotConfig> = Object.freeze({
   baileysLogLevel: "silent",
   maxFiles: 10,
   maxFileSizeKB: 5120,
+  httpTimeout: 15000, // 15 detik
+  circuitBreakerThreshold: 5, // 5 kali gagal berturut-turut
+  circuitBreakerResetTimeout: 30000, // 30 detik sebelum mencoba lagi
   rawMessageLog: false,
   rawBaileysLog: false,
 });

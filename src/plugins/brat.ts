@@ -26,7 +26,7 @@ export default class extends BaseCommand {
       await sock.sendMessage(m.from, { react: { text: "⏳", key: m.key } });
 
       const apiUrl = `https://fourmovie-brat.hf.space/?text=${encodeURIComponent(text)}`;
-      const response = await fetch(apiUrl);
+      const response = await http.fetch(apiUrl);
 
       if (!response.ok) {
         throw new Error(`API returned status ${response.status}`);

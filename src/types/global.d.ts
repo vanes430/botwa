@@ -9,6 +9,7 @@ import type { config as _config } from "../config/config.js";
 import type { logger as _logger } from "../library/logger.js";
 import type { globalQueue as _globalQueue } from "../library/global-queue.js";
 import type { sessionManager as _sessionManager } from "../library/session-manager.js";
+import type { HttpClient as _HttpClient } from "../library/http-client.js";
 
 declare global {
   // Types
@@ -24,6 +25,7 @@ declare global {
   const logger: typeof _logger;
   const globalQueue: typeof _globalQueue;
   const sessionManager: typeof _sessionManager;
+  const http: _HttpClient;
   const startupTimestamp: number;
   const totalMessages: number;
 }

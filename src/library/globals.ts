@@ -19,4 +19,7 @@ g.logger = logger;
 g.proto = proto;
 g.globalQueue = globalQueue;
 g.sessionManager = sessionManager;
+g.http = httpClient;
+g.totalMessages = 0;
+ger;
 g.totalMessages = 0;

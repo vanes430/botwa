@@ -8,6 +8,7 @@ export { initFileLogger } from "./file-logger.js";
 export { functions } from "./functions.js";
 export { garbageCollector } from "./garbage-collector.js";
 export { type CommandTask, globalQueue } from "./global-queue.js";
+export { httpClient } from "./http-client.js";
 export { logger } from "./logger.js";
 export * from "./message-parser.js";
 export { presenceManager } from "./presence-manager.js";
