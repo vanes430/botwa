@@ -10,7 +10,11 @@ import { loadPlugins, watchPlugins } from "./src/modules/index.js";
 import { startBot } from "./src/bot.js";
 
 async function main(): Promise<void> {
-  initFileLogger({ logDir: "./logs", maxFiles: 10, maxFileSizeKB: 5120 });
+  initFileLogger({
+    logDir: "./logs",
+    maxFiles: config.maxFiles,
+    maxFileSizeKB: config.maxFileSizeKB,
+  });
   garbageCollector.start();
 
 

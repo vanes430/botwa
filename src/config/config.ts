@@ -13,6 +13,8 @@ export interface BotConfig {
   antiCall: boolean;
   usePairingCode: boolean;
   baileysLogLevel: "trace" | "debug" | "info" | "warn" | "error" | "silent";
+  maxFiles: number;
+  maxFileSizeKB: number;
   rawMessageLog: boolean;
   rawBaileysLog: boolean;
 }
@@ -32,6 +34,8 @@ export const config: Readonly<BotConfig> = Object.freeze({
   antiCall: false,
   usePairingCode: true,
   baileysLogLevel: "silent",
+  maxFiles: 10,
+  maxFileSizeKB: 5120,
   rawMessageLog: false,
   rawBaileysLog: false,
 });
