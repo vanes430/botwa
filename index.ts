@@ -4,6 +4,8 @@
 // All bot logic is in src/bot.ts
 // ============================================
 
+(globalThis as { startupTimestamp: number }).startupTimestamp = performance.now();
+
 import "./src/library/globals.js";
 import { garbageCollector, initFileLogger, logger } from "./src/library/index.js";
 import { loadPlugins, watchPlugins } from "./src/modules/index.js";

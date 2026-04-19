@@ -24,4 +24,5 @@ declare global {
   const logger: typeof _logger;
   const globalQueue: typeof _globalQueue;
   const sessionManager: typeof _sessionManager;
+  const startupTimestamp: number;
 }

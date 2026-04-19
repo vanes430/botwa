@@ -48,7 +48,9 @@ function setupConnectionHandler(sock: WASocket): void {
     }
 
     if (connection === "open") {
-      logger.info("Bot connected successfully!");
+      const duration = (performance.now() - startupTimestamp).toFixed(0);
+      logger.info(`Bot connected successfully!`);
+      logger.info(`Bot done started : ${duration}ms`);
       reconnectAttempts = 0;
       if (config.alwaysOnline) await sock.sendPresenceUpdate("available");
     }
