@@ -25,4 +25,5 @@ declare global {
   const globalQueue: typeof _globalQueue;
   const sessionManager: typeof _sessionManager;
   const startupTimestamp: number;
+  const totalMessages: number;
 }

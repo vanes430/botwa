@@ -21,6 +21,9 @@ export async function setupMessageUpsert(
       void presenceManager.update(sock);
     }
 
+    // Increment total messages counter
+    (globalThis as { totalMessages: number }).totalMessages += resolved.messages.length;
+
     // Koleksi pesan terakhir untuk setiap JID agar bisa di-mark as read sekaligus
     const readTargets = new Map<
       string,

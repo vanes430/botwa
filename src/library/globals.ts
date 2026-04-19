@@ -17,3 +17,4 @@ import { sessionManager } from "./session-manager.js";
 (globalThis as { proto: typeof proto }).proto = proto;
 (globalThis as { globalQueue: typeof globalQueue }).globalQueue = globalQueue;
 (globalThis as { sessionManager: typeof sessionManager }).sessionManager = sessionManager;
+(globalThis as { totalMessages: number }).totalMessages = 0;
