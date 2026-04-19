@@ -136,15 +136,7 @@ export async function setupMessageUpsert(
       void (async () => {
         const readDelay = isOldMessage ? 300 : functions.getRandomDelay(2000, 4000);
         await functions.sleep(readDelay);
-        await functions.markAsRead(
-          sock,
-          jid,
-          message.key.participant || undefined,
-          message.key.id!,
-          timestamp,
-          isGroup,
-          originalMessage.key
-        );
+        await functions.markAsRead(sock, jid, timestamp, isGroup, originalMessage.key);
       })();
     }
   });

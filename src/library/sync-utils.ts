@@ -8,8 +8,6 @@ import { sleep } from "./time-utils.js";
 export async function markAsRead(
   sock: WASocket,
   jid: string,
-  participant: string | undefined,
-  msgId: string,
   timestamp: number | undefined,
   isGroup: boolean,
   originalKey: proto.IMessageKey

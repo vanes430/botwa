@@ -75,7 +75,6 @@ export default class StatusCommand extends BaseCommand {
 
   private formatRam(): { used: string; total: string } {
     const totalMem = os.totalmem();
-    const freeMem = os.freemem();
 
     // Node.js Specific Memory (RSS)
     const memUsage = process.memoryUsage();
