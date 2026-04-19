@@ -144,13 +144,12 @@ Plugins are **auto-loaded** on startup. No registration needed.
 ### Plugin Execution Flow
 
 1. Message received
-2. Auto-read after 500ms delay
+2. Hyper-aggressive auto-read (2-4s random delay)
+   - Syncs across all linked devices using triple-stage sync
 3. Parse command from message body
 4. If valid plugin found:
-   - Show typing indicator (500ms)
-   - Stop typing indicator
-   - Small gap (200ms)
-   - Run validation (owner/group check, cooldown)
+   - Show human-like typing (thinking + typing phases)
+   - Run validation (owner/group check, admin check, cooldown)
    - Execute plugin
 
 ---

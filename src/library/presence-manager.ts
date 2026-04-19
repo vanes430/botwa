@@ -9,6 +9,7 @@ import { logger } from "./logger.js";
 class PresenceManager {
   private timer: NodeJS.Timeout | null = null;
   private isOnline = false;
+  private isUpdating = false;
   private readonly ON_DURATION = 5 * 60 * 1000; // 5 menit dalam milidetik
 
   /**
@@ -21,30 +22,35 @@ class PresenceManager {
       this.timer = null;
     }
 
-    // Jika bot sedang offline, buat jadi online
-    if (!this.isOnline) {
+    // Jika bot sedang offline dan tidak sedang dalam proses update, buat jadi online
+    if (!this.isOnline && !this.isUpdating) {
+      this.isUpdating = true;
       try {
         await sock.sendPresenceUpdate("available");
         this.isOnline = true;
         logger.debug("[Presence] Bot is now ONLINE (available)");
       } catch (error) {
         logger.error("[Presence] Failed to update presence to available", { error: String(error) });
+      } finally {
+        this.isUpdating = false;
       }
     }
 
     // Set timer untuk mematikan status online setelah 5 menit
-    this.timer = setTimeout(async () => {
-      try {
-        await sock.sendPresenceUpdate("unavailable");
-        this.isOnline = false;
-        this.timer = null;
-        logger.debug("[Presence] Bot is now OFFLINE (unavailable) due to inactivity");
-      } catch (error) {
-        logger.error("[Presence] Failed to update presence to unavailable", {
-          error: String(error),
-        });
-      }
-    }, this.ON_DURATION);
+    if (!this.timer) {
+      this.timer = setTimeout(async () => {
+        try {
+          await sock.sendPresenceUpdate("unavailable");
+          this.isOnline = false;
+          this.timer = null;
+          logger.debug("[Presence] Bot is now OFFLINE (unavailable) due to inactivity");
+        } catch (error) {
+          logger.error("[Presence] Failed to update presence to unavailable", {
+            error: String(error),
+          });
+        }
+      }, this.ON_DURATION);
+    }
   }
 
   /**

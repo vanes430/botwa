@@ -88,7 +88,7 @@ async function executeCommand(
   args: string[],
   commandName: string
 ): Promise<void> {
-  // 1. Final permission checks (in case group status/admin changed while in queue)
+  // 1. Final permission checks
   if (cmd.isAdmin === true && data.isGroup) {
     const isUserAdmin = await functions.isAdmin(sock, data.from, data.sender);
     if (!isUserAdmin && !functions.isOwner(data.sender)) {
@@ -111,24 +111,20 @@ async function executeCommand(
 
   // 2. Human-like behaviors (mark as read & typing)
   if (config.autoRead === true) {
-    const readDelay = functions.getRandomDelay(2000, 4000);
-    await functions.sleep(readDelay);
-    await sock.readMessages([data.key]);
+    await functions.sleep(functions.getRandomDelay(2000, 4000));
+    await functions.markAsRead(
+      sock,
+      data.from,
+      data.originalKey.participant || undefined,
+      data.originalKey.id!,
+      data.timestamp,
+      data.isGroup,
+      data.originalKey
+    );
   }
 
   if (config.autoTyping === true) {
-    const thinkingDelay = functions.getRandomDelay(400, 750);
-    await functions.sleep(thinkingDelay);
-
-    await sock.sendPresenceUpdate("composing", data.from);
-
-    const typingDelay = functions.getRandomDelay(1500, 2500);
-    await functions.sleep(typingDelay);
-
-    await sock.sendPresenceUpdate("paused", data.from);
-
-    const postTypingDelay = functions.getRandomDelay(500, 1000);
-    await functions.sleep(postTypingDelay);
+    await showHumanTyping(sock, data.from);
   }
 
   // 3. Set cooldown and execute
@@ -146,6 +142,24 @@ async function executeCommand(
       text: "An error occurred while executing the command.",
     });
   }
+}
+
+/**
+ * Simulasi mengetik manusia
+ */
+async function showHumanTyping(sock: WASocket, from: string): Promise<void> {
+  const thinkingDelay = functions.getRandomDelay(400, 750);
+  await functions.sleep(thinkingDelay);
+
+  await sock.sendPresenceUpdate("composing", from);
+
+  const typingDelay = functions.getRandomDelay(1500, 2500);
+  await functions.sleep(typingDelay);
+
+  await sock.sendPresenceUpdate("paused", from);
+
+  const postTypingDelay = functions.getRandomDelay(500, 1000);
+  await functions.sleep(postTypingDelay);
 }
 
 export { handleMessage };

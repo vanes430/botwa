@@ -2,6 +2,7 @@ import type { proto, WASocket } from "baileys";
 
 export interface MessageData {
   key: proto.IMessageKey;
+  originalKey: proto.IMessageKey;
   message: proto.IMessage | null | undefined;
   body: string;
   from: string;

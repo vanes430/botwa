@@ -27,9 +27,9 @@ WhatsApp Bot modern berbasis **Bun** dan **Baileys** dengan fokus pada keamanan 
 
 Bot ini tidak hanya sekadar membalas pesan, tapi memiliki infrastruktur backend yang canggih:
 
+- **Humanized Behavior**: Simulasi perilaku manusia dengan jeda baca (*hyper-aggressive auto-read*) yang menjamin sinkronisasi notifikasi di semua perangkat, serta durasi mengetik (*typing*) yang diacak secara cerdas.
+- **Smart Presence Management**: Bot menjadi online secara cerdas hanya saat ada interaksi, dengan sistem *concurrency protection* untuk mencegah spam log.
 - **Global FIFO Command Queue**: Menjamin bot hanya mengeksekusi satu perintah dalam satu waktu secara berurutan. Ini mencegah aktivitas paralel yang mencurigakan di mata WhatsApp.
-- **Humanized Behavior**: Simulasi perilaku manusia dengan jeda baca (*auto-read*) dan durasi mengetik (*typing*) yang diacak secara cerdas.
-- **Interactive State Machine**: Sistem `sessionManager` yang memungkinkan bot melakukan percakapan tanya-jawab interaktif (stateful) dengan user.
 - **Smart Anti-Call System**: Menolak panggilan secara otomatis dengan sistem peringatan bertahap hingga blokir otomatis jika user melanggar batas.
 - **Automated Garbage Collector**: Pembersihan rutin setiap jam untuk menghapus file sampah di folder `tmp`, mengarsipkan log lama, dan membersihkan sesi expired.
 - **Decorator-based Plugin System**: Menggunakan standar industri modern (`@Command`) untuk pendaftaran plugin yang bersih dan deklaratif.

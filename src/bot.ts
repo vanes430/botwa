@@ -13,6 +13,7 @@ import pino from "pino";
 import { calculateBackoff } from "./core/connection-logic.js";
 import { setupCallHandler } from "./handlers/call.js";
 import { setupMessageUpsert } from "./handlers/message.js";
+import { setupPollHandler } from "./handlers/poll.js";
 
 let pairingCodeRequested = false;
 let groupCache = new Map<string, string>();
@@ -153,6 +154,7 @@ async function startBot(): Promise<void> {
   setupConnectionHandler(sock);
   await setupMessageUpsert(sock, getGroupName);
   setupCallHandler(sock);
+  setupPollHandler(sock);
 }
 
 export { startBot };
