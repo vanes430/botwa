@@ -1,4 +1,3 @@
-import type { WASocket } from "baileys";
 import { config } from "../config/config.js";
 import { functions } from "../library/index.js";
 import { trackCommand } from "../plugins/stats.js";
@@ -112,15 +111,7 @@ async function executeCommand(
   // 2. Human-like behaviors (mark as read & typing)
   if (config.autoRead === true) {
     await functions.sleep(functions.getRandomDelay(2000, 4000));
-    await functions.markAsRead(
-      sock,
-      data.from,
-      data.originalKey.participant || undefined,
-      data.originalKey.id!,
-      data.timestamp,
-      data.isGroup,
-      data.originalKey
-    );
+    await functions.markAsRead(sock, data.from, data.timestamp, data.isGroup, data.originalKey);
   }
 
   if (config.autoTyping === true) {

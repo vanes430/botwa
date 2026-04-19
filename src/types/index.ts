@@ -1,5 +1,3 @@
-import type { proto, WASocket } from "baileys";
-
 export interface MessageData {
   key: proto.IMessageKey;
   originalKey: proto.IMessageKey;

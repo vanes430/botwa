@@ -1,5 +1,3 @@
-import type { BaileysEventMap } from "baileys";
-
 type WAMessageKey = {
   remoteJid: string | undefined;
   fromMe: boolean;

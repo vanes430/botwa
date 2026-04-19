@@ -1,4 +1,3 @@
-import type { WASocket } from "baileys";
 import { config } from "../config/config.js";
 
 /**

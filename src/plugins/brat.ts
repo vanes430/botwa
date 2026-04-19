@@ -1,4 +1,3 @@
-import type { WASocket } from "baileys";
 import sharp from "sharp";
 import { Command } from "../library/decorators.js";
 import { logger } from "../library/logger.js";

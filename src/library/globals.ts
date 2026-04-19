@@ -10,11 +10,13 @@ import { sessionManager } from "./session-manager.js";
  * Menempelkan variabel-variabel penting ke globalThis agar
  * bisa diakses di seluruh file tanpa import berulang.
  */
-(globalThis as { Command: typeof Command }).Command = Command;
-(globalThis as { BaseCommand: typeof BaseCommand }).BaseCommand = BaseCommand;
-(globalThis as { config: typeof config }).config = config;
-(globalThis as { logger: typeof logger }).logger = logger;
-(globalThis as { proto: typeof proto }).proto = proto;
-(globalThis as { globalQueue: typeof globalQueue }).globalQueue = globalQueue;
-(globalThis as { sessionManager: typeof sessionManager }).sessionManager = sessionManager;
-(globalThis as { totalMessages: number }).totalMessages = 0;
+const g = globalThis as unknown as Record<string, unknown>;
+
+g.Command = Command;
+g.BaseCommand = BaseCommand;
+g.config = config;
+g.logger = logger;
+g.proto = proto;
+g.globalQueue = globalQueue;
+g.sessionManager = sessionManager;
+g.totalMessages = 0;

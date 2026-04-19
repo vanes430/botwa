@@ -1,4 +1,4 @@
-import type { BaileysEventMap, proto, WASocket } from "baileys";
+import type { BaileysEventMap } from "baileys";
 import { config } from "../config/config.js";
 import { printMessageLog } from "../core/connection-logic.js";
 import { functions, presenceManager } from "../library/index.js";
@@ -22,7 +22,7 @@ export async function setupMessageUpsert(
     }
 
     // Increment total messages counter
-    (globalThis as { totalMessages: number }).totalMessages += resolved.messages.length;
+    (globalThis as unknown as { totalMessages: number }).totalMessages += resolved.messages.length;
 
     // Koleksi pesan terakhir untuk setiap JID agar bisa di-mark as read sekaligus
     const readTargets = new Map<
@@ -74,7 +74,7 @@ export async function setupMessageUpsert(
           pollStore.set(message.key.id, {
             encKey: messageSecret,
             name: pollCreation.name || "",
-            options: pollCreation.options?.map((o) => o.optionName || "") || [],
+            options: pollCreation.options?.map((o: proto.IPollOption) => o.optionName || "") || [],
             creatorJid: message.key.fromMe
               ? `${sock.user?.id?.split(":")[0] || ""}@s.whatsapp.net`
               : message.key.participant || message.key.remoteJid!,

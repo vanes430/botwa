@@ -84,7 +84,6 @@ async function startBot(): Promise<void> {
   const originalStdoutWrite = process.stdout.write.bind(process.stdout);
   const originalStderrWrite = process.stderr.write.bind(process.stderr);
 
-  // @ts-expect-error - Overriding complex signature
   process.stdout.write = (
     chunk: string | Uint8Array,
     encoding?: string | ((err?: Error | null | undefined) => void),
@@ -93,12 +92,11 @@ async function startBot(): Promise<void> {
     if (filter(chunk)) return true;
     return originalStdoutWrite(
       chunk,
-      encoding as string,
+      encoding as BufferEncoding,
       callback as (err?: Error | null | undefined) => void
     );
   };
 
-  // @ts-expect-error - Overriding complex signature
   process.stderr.write = (
     chunk: string | Uint8Array,
     encoding?: string | ((err?: Error | null | undefined) => void),
@@ -107,7 +105,7 @@ async function startBot(): Promise<void> {
     if (filter(chunk)) return true;
     return originalStderrWrite(
       chunk,
-      encoding as string,
+      encoding as BufferEncoding,
       callback as (err?: Error | null | undefined) => void
     );
   };
@@ -123,7 +121,6 @@ async function startBot(): Promise<void> {
 
   // Patch util.inspect as Baileys might be using it to dump the object
   const originalInspect = util.inspect;
-  // @ts-expect-error - Overriding complex signature
   util.inspect = (obj: unknown, options?: util.InspectOptions) => {
     if (
       obj &&

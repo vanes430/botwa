@@ -1,4 +1,4 @@
-import type { BaileysEventMap, WASocket } from "baileys";
+import type { BaileysEventMap } from "baileys";
 import { functions, presenceManager, userService } from "../library/index.js";
 
 /**

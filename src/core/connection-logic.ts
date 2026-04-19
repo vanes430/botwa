@@ -1,4 +1,3 @@
-import type { proto, WASocket } from "baileys";
 import { logger } from "../library/index.js";
 
 const MAX_RECONNECT_DELAY = 60_000;

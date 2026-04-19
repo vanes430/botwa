@@ -1,4 +1,3 @@
-import type { proto, WASocket } from "baileys";
 import { sleep } from "./time-utils.js";
 
 /**

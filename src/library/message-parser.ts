@@ -1,4 +1,3 @@
-import type { proto } from "baileys";
 import { config } from "../config/config.js";
 import type { MessageData } from "../types/index.js";
 

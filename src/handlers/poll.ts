@@ -1,4 +1,4 @@
-import { type BaileysEventMap, decryptPollVote, type WASocket } from "baileys";
+import { type BaileysEventMap, decryptPollVote } from "baileys";
 import { functions } from "../library/index.js";
 import { handleMessage } from "../modules/index.js";
 import type { MessageData } from "../types/index.js";

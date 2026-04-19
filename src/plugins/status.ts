@@ -1,5 +1,4 @@
 import os from "node:os";
-import type { WASocket } from "baileys";
 import { Command } from "../library/decorators.js";
 import { getAllCommands } from "../modules/plugin-registry.js";
 import { BaseCommand, type MessageData } from "../types/index.js";

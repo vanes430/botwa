@@ -1,4 +1,3 @@
-import type { WASocket } from "baileys";
 import { logger } from "./logger.js";
 
 /**
