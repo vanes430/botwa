@@ -1,80 +1,102 @@
-import { userService } from "../library/index.js";
+import { generateWAMessageFromContent, proto } from "baileys";
+import { config } from "../config/config.js";
 import { getCategories, getCategoryMeta, getGroupedCommands } from "../modules/plugin-loader.js";
 
-@Command({
+export const command = {
   name: "menu",
   alias: ["help", "commands"],
   category: "general",
-  description: "Show all available commands",
+  description: "Infinity Advanced List Menu",
   usage: ".menu",
-})
-export default class extends BaseCommand {
-  public async execute(sock: WASocket, m: MessageData): Promise<void> {
+  execute: async (sock, m) => {
+    const { from, pushName } = m;
+    const prefix = config.prefix[0];
     const grouped = getGroupedCommands();
-    const categories = getCategories();
-    const totalCommands = Array.from(grouped.values()).reduce((acc, curr) => acc + curr.length, 0);
 
-    const userStats = await userService.getStats(m.sender);
+    // 1. OTOMATIS DETEKSI SEMUA KATEGORI (Infinity Logic)
+    const categories = getCategories().sort((a, b) => a.localeCompare(b));
 
-    // Sort categories
-    const order = [
-      "general",
-      "tools",
-      "search",
-      "downloader",
-      "group",
-      "fun",
-      "owner",
-      "ai",
-      "sticker",
-      "islamic",
-      "random",
-    ];
-    const sortedCategories = [...categories].sort((a, b): number => {
-      const ai = order.indexOf(a.toLowerCase());
-      const bi = order.indexOf(b.toLowerCase());
-      if (ai === -1 && bi === -1) return a.localeCompare(b);
-      if (ai === -1) return 1;
-      if (bi === -1) return -1;
-      return ai - bi;
+    // 2. GENERATE INFINITY ADVANCED LIST BUTTONS
+    // Every category gets its own 'single_select' button with 'has_multiple_buttons: true'
+    const dynamicButtons = categories.map((cat) => {
+      const meta = getCategoryMeta(cat);
+      const cmds = (grouped.get(cat) ?? []).sort((a, b) =>
+        a.command.name.localeCompare(b.command.name)
+      );
+
+      return {
+        name: "single_select",
+        buttonParamsJson: JSON.stringify({
+          title: `${meta.emoji} ${meta.displayName.toUpperCase()} MENU`, // Layer 3: Independent Hub
+          sections: [
+            {
+              title: `LIST COMMAND ${meta.displayName.toUpperCase()}`, // Layer 4: Mandiri Category
+              rows: cmds.map((c) => ({
+                title: `${prefix}${c.command.name}`, // Layer 5: Rows
+                description: c.command.description || `Fitur ${c.command.name}`,
+                id: `${prefix}${c.command.name}`,
+              })),
+            },
+          ],
+          has_multiple_buttons: true, // This is applied to EVERY button dynamically
+        }),
+      };
     });
 
-    // Build header
-    let menuText = `╭━━━〔 *${config.botName}* 〕━━━┈⊷\n`;
-    menuText += `┃ 📋 Total: *${totalCommands}* Commands\n`;
-    menuText += `┃ 🔖 Prefix: *${config.prefix[0]}*\n`;
-    menuText += `┃ 👤 User: *${m.pushName}*\n`;
-    menuText += `┃ 📊 Usage: *${userStats.commandCount}* cmds\n`;
-    menuText += `╰━━━━━━━━━━━━━━━┈⊷\n\n`;
+    // 3. CONSTRUCT THE INTERACTIVE MESSAGE
+    const interactiveMessage = {
+      header: {
+        title: `🌟 ${config.botName.toUpperCase()} CORE`, // Layer 1
+        subtitle: `Uptime: ${Math.floor(process.uptime() / 60)}m`,
+        hasMediaAttachment: false,
+      },
+      body: {
+        text: `Halo *${pushName}*!\n\nSistem telah mendeteksi *${categories.length} Kategori Mandiri*.\nSilakan jelajahi fitur kami melalui Pusat Kendali di bawah.`,
+      },
+      footer: { text: `© ${config.botName} • Infinity Advanced List` },
+      nativeFlowMessage: {
+        buttons: [
+          ...dynamicButtons, // Infinity Advanced Lists
+          {
+            name: "quick_reply", // Final Interaction Element
+            buttonParamsJson: JSON.stringify({
+              display_text: "🛡️ PING SYSTEM",
+              id: `${prefix}ping`,
+            }),
+          },
+          {
+            name: "quick_reply",
+            buttonParamsJson: JSON.stringify({
+              display_text: "📊 STATS INFO",
+              id: `${prefix}stats`,
+            }),
+          },
+        ],
+        messageParamsJson: JSON.stringify({
+          bottom_sheet: {
+            // Layer 2
+            in_thread_buttons_limit: 0,
+            divider_indices: [dynamicButtons.length],
+            list_title: "COMMAND CONTROL CENTER",
+            button_title: "📂 BUKA PUSAT KENDALI",
+          },
+        }),
+      },
+    };
 
-    for (const category of sortedCategories) {
-      const meta = getCategoryMeta(category);
-      const cmds = grouped.get(category) ?? [];
+    const msg = generateWAMessageFromContent(
+      from,
+      {
+        viewOnceMessageV2: {
+          message: {
+            messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+            interactiveMessage: proto.Message.InteractiveMessage.fromObject(interactiveMessage),
+          },
+        },
+      },
+      { userJid: sock.user.id }
+    );
 
-      cmds.sort((a, b): number => {
-        const aWeight = (a.command.isOwner ? 100 : 0) + (a.command.isAdmin ? 10 : 0);
-        const bWeight = (b.command.isOwner ? 100 : 0) + (b.command.isAdmin ? 10 : 0);
-        return aWeight - bWeight;
-      });
-
-      menuText += `╭━━━〔 *${meta.emoji} ${meta.displayName}* 〕━━━┈⊷\n`;
-      for (const entry of cmds) {
-        const cmd = entry.command;
-        const aliasText =
-          cmd.alias !== undefined && cmd.alias.length > 0 ? ` (${cmd.alias.join(", ")})` : "";
-        const badges = [...entry.badges];
-        if (cmd.isAdmin) badges.push("👑");
-        const badgeText = badges.length > 0 ? ` ${badges.join("")}` : "";
-
-        menuText += `┃ ◦ ${cmd.name}${aliasText}${badgeText}\n`;
-        menuText += `┃   └─ _${cmd.description ?? "No description"}_\n`;
-      }
-      menuText += `╰━━━━━━━━━━━━━━━┈⊷\n\n`;
-    }
-
-    menuText += `💡 _Usage: ${config.prefix[0]}<command> [args]_\n`;
-    menuText += `🔒=Owner | 👥=Group | 👑=Admin`;
-
-    await sock.sendMessage(m.from, { text: menuText });
-  }
-}
+    await sock.relayMessage(from, msg.message, { messageId: msg.key.id });
+  },
+};

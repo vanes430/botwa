@@ -3,6 +3,7 @@ import { config } from "../config/config.js";
 import { BaseCommand } from "../types/index.js";
 import { Command } from "./decorators.js";
 import { globalQueue } from "./global-queue.js";
+import { httpClient } from "./http-client.js";
 import { logger } from "./logger.js";
 import { sessionManager } from "./session-manager.js";
 
@@ -20,6 +21,4 @@ g.proto = proto;
 g.globalQueue = globalQueue;
 g.sessionManager = sessionManager;
 g.http = httpClient;
-g.totalMessages = 0;
-ger;
 g.totalMessages = 0;

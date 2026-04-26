@@ -7,7 +7,17 @@ import type { MessageData } from "../types/index.js";
 export function extractMessageText(message: proto.IMessage | null | undefined): string {
   if (!message) return "";
 
-  const msg = message;
+  // Helper to normalize viewOnce messages
+  const getMessageContent = (m: proto.IMessage): proto.IMessage => {
+    if (m.viewOnceMessage?.message) return m.viewOnceMessage.message;
+    if (m.viewOnceMessageV2?.message) return m.viewOnceMessageV2.message;
+    if (m.viewOnceMessageV2Extension?.message) return m.viewOnceMessageV2Extension.message;
+    if (m.ephemeralMessage?.message) return m.ephemeralMessage.message;
+    return m;
+  };
+
+  const msg = getMessageContent(message);
+
   if (typeof msg.conversation === "string") return msg.conversation;
 
   if (msg.extendedTextMessage?.text) return msg.extendedTextMessage.text;
@@ -17,13 +27,16 @@ export function extractMessageText(message: proto.IMessage | null | undefined): 
   if (msg.videoMessage?.caption) return msg.videoMessage.caption;
 
   // Button & Interactive Responses
+  if (msg.buttonsResponseMessage?.selectedButtonId)
+    return msg.buttonsResponseMessage.selectedButtonId;
+
   if (msg.buttonsResponseMessage?.selectedDisplayText)
     return msg.buttonsResponseMessage.selectedDisplayText;
 
-  if (msg.templateButtonReplyMessage?.selectedDisplayText)
-    return msg.templateButtonReplyMessage.selectedDisplayText;
+  if (msg.templateButtonReplyMessage?.selectedId) return msg.templateButtonReplyMessage.selectedId;
 
-  if (msg.listResponseMessage?.title) return msg.listResponseMessage.title;
+  if (msg.listResponseMessage?.singleSelectReply?.selectedRowId)
+    return msg.listResponseMessage.singleSelectReply.selectedRowId;
 
   if (msg.interactiveResponseMessage?.nativeFlowResponseMessage?.paramsJson) {
     try {
@@ -45,7 +58,32 @@ export function extractMessageText(message: proto.IMessage | null | undefined): 
 export function getQuotedMessage(
   message: proto.IMessage | null | undefined
 ): MessageData["quoted"] | undefined {
-  const contextInfo = message?.extendedTextMessage?.contextInfo;
+  if (!message) return undefined;
+
+  // Extract contextInfo from any message type
+  const getContextInfo = (msg: proto.IMessage): proto.IContextInfo | null | undefined => {
+    // Try common ones first
+    if (msg.extendedTextMessage?.contextInfo) return msg.extendedTextMessage.contextInfo;
+    if (msg.imageMessage?.contextInfo) return msg.imageMessage.contextInfo;
+    if (msg.videoMessage?.contextInfo) return msg.videoMessage.contextInfo;
+    if (msg.stickerMessage?.contextInfo) return msg.stickerMessage.contextInfo;
+    if (msg.documentMessage?.contextInfo) return msg.documentMessage.contextInfo;
+    if (msg.audioMessage?.contextInfo) return msg.audioMessage.contextInfo;
+    if (msg.contactMessage?.contextInfo) return msg.contactMessage.contextInfo;
+    if (msg.locationMessage?.contextInfo) return msg.locationMessage.contextInfo;
+    if (msg.liveLocationMessage?.contextInfo) return msg.liveLocationMessage.contextInfo;
+
+    // Fallback search through all keys for contextInfo
+    for (const key of Object.keys(msg)) {
+      const subMsg = msg[key as keyof proto.IMessage];
+      if (subMsg && typeof subMsg === "object" && "contextInfo" in subMsg) {
+        return (subMsg as { contextInfo: proto.IContextInfo }).contextInfo;
+      }
+    }
+    return undefined;
+  };
+
+  const contextInfo = getContextInfo(message);
   const quotedMsg = contextInfo?.quotedMessage;
 
   if (!quotedMsg) return undefined;

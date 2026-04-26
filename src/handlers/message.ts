@@ -40,27 +40,22 @@ export async function setupMessageUpsert(
       const sender = isGroup ? (message.key.participant ?? from) : from;
 
       const timestamp = Number(message.messageTimestamp || 0);
-      const isOldMessage = timestamp < currentTime - 10;
+      const isOldMessage = timestamp < currentTime - 15; // Batas 15 detik
 
+      // Skip sync/old messages
+      if (resolved.type !== "notify" || isOldMessage) continue;
+
+      // LOG pesan (termasuk stiker/media yang tidak ada teksnya)
+      await printMessageLog(sock, message, functions, getGroupName);
+
+      // Jika pesan kosong (misal protocol message atau sejenisnya), jangan lanjut ke parsing
+      if (!message.message) continue;
+
+      const body = functions.extractMessageText(message.message);
       // Simpan pesan terbaru untuk JID ini untuk ditandai sudah dibaca nanti
       if (config.autoRead === true && !message.key.fromMe) {
         readTargets.set(from, { message, originalMessage });
       }
-
-      const body = functions.extractMessageText(message.message);
-
-      // LOG hanya untuk pesan baru
-      if (
-        body !== "" &&
-        message.message !== undefined &&
-        resolved.type === "notify" &&
-        !isOldMessage
-      ) {
-        await printMessageLog(sock, message, functions, getGroupName);
-      }
-
-      // Jika pesan lama atau bukan tipe notify, jangan lanjut ke fitur/command
-      if (message.message === undefined || resolved.type !== "notify" || isOldMessage) continue;
 
       const pollCreation =
         message.message.pollCreationMessage ||

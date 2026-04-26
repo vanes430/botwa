@@ -18,7 +18,7 @@ export async function markAsRead(
     await sock.readMessages([originalKey]);
 
     if (isGroup) {
-      // Untuk grup, kita tambahkan chatModify agar status unread count di HP benar-benar nol
+      // Untuk grup, kita tambahkan chatModify agar status unread count di HP benar-bit nol
       await sleep(200);
       await sock.chatModify(
         {

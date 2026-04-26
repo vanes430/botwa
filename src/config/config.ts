@@ -12,11 +12,15 @@ export interface BotConfig {
   selfCommand: boolean;
   antiCall: boolean;
   usePairingCode: boolean;
+  customPairingCode: string;
   baileysLogLevel: "trace" | "debug" | "info" | "warn" | "error" | "silent";
   maxFiles: number;
   maxFileSizeKB: number;
   rawMessageLog: boolean;
   rawBaileysLog: boolean;
+  httpTimeout: number;
+  circuitBreakerThreshold: number;
+  circuitBreakerResetTimeout: number;
 }
 
 export const config: Readonly<BotConfig> = Object.freeze({
@@ -24,15 +28,16 @@ export const config: Readonly<BotConfig> = Object.freeze({
   ownerNumber: ["6281226485398"],
   prefix: [".", "!", "#", "/"],
   botName: "WhatsApp Bot",
-  sessionName: "./auth_session",
+  sessionName: "session.db",
   cooldown: 3000,
   maxRetries: 3,
   autoRead: true,
   autoTyping: true,
   alwaysOnline: false,
   selfCommand: true,
-  antiCall: false,
+  antiCall: true,
   usePairingCode: true,
+  customPairingCode: "VANES430",
   baileysLogLevel: "silent",
   maxFiles: 10,
   maxFileSizeKB: 5120,

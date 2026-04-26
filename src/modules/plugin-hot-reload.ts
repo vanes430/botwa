@@ -2,7 +2,7 @@ import { watch } from "node:fs";
 import { stat } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { logger } from "../library/logger.js";
-import type { PluginCommand } from "../types/index.js";
+import type { BaseCommand, PluginCommand } from "../types/index.js";
 import { registerPlugin, unregisterPlugin } from "./plugin-registry.js";
 
 async function reloadSinglePlugin(filePath: string): Promise<void> {
@@ -11,13 +11,35 @@ async function reloadSinglePlugin(filePath: string): Promise<void> {
 
   try {
     const moduleUrl = filePath.startsWith("file://") ? filePath : `file://${filePath}`;
+    // Tambahkan timestamp untuk mem-bypass cache import
+    const cacheBuster = `?t=${Date.now()}`;
     unregisterPlugin(pluginName);
 
-    const freshModule = (await import(moduleUrl)) as Record<string, unknown>;
-    const pluginCommand = freshModule.command as PluginCommand | undefined;
+    const freshModule = (await import(moduleUrl + cacheBuster)) as Record<string, unknown>;
+
+    let pluginCommand: PluginCommand | undefined;
+
+    // 1. Cek apakah itu Decorator-based (Default Export adalah Class)
+    if (typeof freshModule.default === "function") {
+      const CommandClass = freshModule.default as new () => BaseCommand;
+      const metadata = (CommandClass.prototype as { metadata?: PluginCommand }).metadata;
+
+      if (metadata !== undefined) {
+        const instance = new CommandClass();
+        pluginCommand = {
+          ...metadata,
+          execute: instance.execute.bind(instance),
+        };
+      }
+    }
+
+    // 2. Fallback ke Object-based (export const command)
+    if (pluginCommand === undefined) {
+      pluginCommand = freshModule.command as PluginCommand | undefined;
+    }
 
     if (pluginCommand === undefined) {
-      logger.warn(`[Hot-Reload] Skipped ${fileName}: no 'command' export`);
+      logger.warn(`[Hot-Reload] Skipped ${fileName}: no valid plugin export found`);
       return;
     }
 
