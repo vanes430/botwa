@@ -5,3 +5,4 @@ logs/
 *.log
 *.tar.gz
 .env
+baileys/
