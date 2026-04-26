@@ -65,54 +65,40 @@ bun run start
 
 ---
 
-## 🔄 Alur Kerja Sistem Lengkap (Comprehensive Walkthrough)
+## 🔄 Alur Kerja Sistem (System Workflow)
 
-Sistem ini dirancang untuk menangani berbagai jenis interaksi dari WhatsApp secara modular dan aman. Berikut adalah detail bagaimana berbagai event dikelola:
+Diagram di bawah ini menjelaskan siklus hidup bot dari saat dijalankan hingga siap menerima pesan:
 
-### 1. Penanganan Identitas (LID to PN Resolution)
-WhatsApp sering mengirimkan ID unik baru yang disebut LID (`@lid`). Sistem memiliki resolver bawaan untuk memastikan bot selalu berinteraksi dengan nomor telepon asli (`@s.whatsapp.net`).
-- **Proses**: Setiap pesan masuk melewati `transformMessagesUpsert` -> `resolveMessagePN`. Jika metadata berisi nomor telepon alternatif (PN), sistem akan menukar LID dengan PN tersebut secara otomatis sebelum masuk ke logika utama.
-
-### 2. Alur Event & Respon
 ```mermaid
 sequenceDiagram
-    participant WA as WhatsApp Server
+    participant OS as System (Bun)
+    participant Entry as index.ts
+    participant Bot as src/bot.ts
     participant Socket as Baileys Socket
-    participant Handler as Event Handlers
-    participant Resolver as LID Resolver
-    participant Manager as Bot Manager (Logic/Queue)
-    participant Plugin as Plugin Module
+    participant WA as WhatsApp Server
 
-    Note over WA, Plugin: --- ALUR PESAN & PERINTAH ---
-    WA->>Socket: Event: messages.upsert
-    Socket->>Handler: Kirim batch pesan
-    Handler->>Resolver: Normalisasi LID ke PN
-    Resolver-->>Handler: Pesan dengan JID bersih
-    Handler->>Manager: handleMessage()
-    Manager->>Manager: Validasi (Middleware/Cooldown)
-    Manager->>Plugin: executeCommand()
-    Plugin->>Socket: sendMessage()
+    Note over OS, WA: --- FASE INISIALISASI ---
+    OS->>Entry: bun run start
+    Entry->>Entry: Init Logger & GC
+    Entry->>Entry: Load Plugins (Dynamic)
+    Entry->>Bot: startBot()
 
-    Note over WA, Plugin: --- ALUR PANGGILAN (ANTI-CALL) ---
-    WA->>Socket: Event: call (offer)
-    Socket->>Handler: setupCallHandler
-    Handler->>Handler: Cek config.antiCall
-    Handler->>Socket: rejectCall(callId)
-    Handler->>Manager: Trigger Smart Presence (Online 5m)
+    Note over Entry, WA: --- FASE KONEKSI ---
+    Bot->>Socket: makeWASocket(Config)
+    Socket->>WA: Request Connection
+    alt Belum Login
+        WA-->>Bot: Kirim QR / Pairing Code
+        Bot-->>Entry: Tampilkan di Terminal
+    else Sudah Login
+        WA-->>Socket: Connection Open
+        Socket-->>Bot: Event: connection.update (open)
+        Bot->>WA: sendPresenceUpdate (Available)
+    end
 
-    Note over WA, Plugin: --- ALUR POLLING (INTERAKTIF) ---
-    WA->>Socket: Event: messages.update (poll vote)
-    Socket->>Handler: setupPollHandler
-    Handler->>Handler: Dekripsi Vote (AES-GCM)
-    Handler->>Manager: handleMessage (Vote as Command/Text)
-    Manager->>Plugin: Eksekusi berdasarkan pilihan poll
+    Note over Entry, WA: --- FASE READY ---
+    Bot->>Bot: Setup Event Handlers (Message, Call)
+    Bot-->>Entry: Bot Connected & Ready!
 ```
-
-### 3. Smart Presence & Anti-Ban
-Bot ini memiliki sistem manajemen kehadiran yang cerdas untuk menghindari deteksi bot oleh WhatsApp:
-- **Always Online Off**: Bot akan terlihat offline saat diam.
-- **Triggered Presence**: Bot otomatis menjadi online selama beberapa menit hanya saat ada pesan masuk atau panggilan.
-- **Humanized Typing**: Simulasi mengetik (`composing`) dilakukan dengan jeda acak antara 1.5 - 2.5 detik sebelum membalas.
 
 ---
 

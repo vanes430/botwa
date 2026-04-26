@@ -3,7 +3,6 @@ import { config } from "../config/config.js";
 import { printMessageLog } from "../core/connection-logic.js";
 import { functions, presenceManager } from "../library/index.js";
 import { handleMessage, transformMessagesUpsert } from "../modules/index.js";
-import { pollStore } from "./poll.js";
 
 /**
  * Menangani event messages.upsert dari Baileys
@@ -55,26 +54,6 @@ export async function setupMessageUpsert(
       // Simpan pesan terbaru untuk JID ini untuk ditandai sudah dibaca nanti
       if (config.autoRead === true && !message.key.fromMe) {
         readTargets.set(from, { message, originalMessage });
-      }
-
-      const pollCreation =
-        message.message.pollCreationMessage ||
-        message.message.pollCreationMessageV2 ||
-        message.message.pollCreationMessageV3 ||
-        message.message.pollCreationMessageV4;
-
-      if (pollCreation && message.key.id) {
-        const messageSecret = message.messageContextInfo?.messageSecret;
-        if (messageSecret) {
-          pollStore.set(message.key.id, {
-            encKey: messageSecret,
-            name: pollCreation.name || "",
-            options: pollCreation.options?.map((o: proto.IPollOption) => o.optionName || "") || [],
-            creatorJid: message.key.fromMe
-              ? `${sock.user?.id?.split(":")[0] || ""}@s.whatsapp.net`
-              : message.key.participant || message.key.remoteJid!,
-          });
-        }
       }
 
       const messageData: MessageData = {

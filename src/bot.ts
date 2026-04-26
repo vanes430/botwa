@@ -184,7 +184,6 @@ async function startBot(): Promise<void> {
   setupConnectionHandler(sock);
   await setupMessageUpsert(sock, getGroupName);
   setupCallHandler(sock);
-  setupPollHandler(sock);
 }
 
 export { startBot };
