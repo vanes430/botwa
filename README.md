@@ -67,38 +67,77 @@ bun run start
 
 ## 🔄 Alur Kerja Sistem (System Workflow)
 
-Diagram di bawah ini menjelaskan siklus hidup bot dari saat dijalankan hingga siap menerima pesan:
+Diagram di bawah ini menjelaskan siklus hidup bot dari saat dijalankan hingga eksekusi perintah dengan perilaku manusia (*humanized*):
 
 ```mermaid
 sequenceDiagram
-    participant OS as System (Bun)
-    participant Entry as index.ts
-    participant Bot as src/bot.ts
-    participant Socket as Baileys Socket
     participant WA as WhatsApp Server
+    participant Socket as Baileys Socket
+    participant Logic as Message Logic
+    participant Queue as Global Queue
+    participant Plugin as Plugin Module
 
-    Note over OS, WA: --- FASE INISIALISASI ---
-    OS->>Entry: bun run start
-    Entry->>Entry: Init Logger & GC
-    Entry->>Entry: Load Plugins (Dynamic)
-    Entry->>Bot: startBot()
-
-    Note over Entry, WA: --- FASE KONEKSI ---
-    Bot->>Socket: makeWASocket(Config)
-    Socket->>WA: Request Connection
-    alt Belum Login
-        WA-->>Bot: Kirim QR / Pairing Code
-        Bot-->>Entry: Tampilkan di Terminal
-    else Sudah Login
-        WA-->>Socket: Connection Open
-        Socket-->>Bot: Event: connection.update (open)
-        Bot->>WA: sendPresenceUpdate (Available)
+    WA->>Socket: Pesan Masuk
+    Socket->>Logic: handleMessage(data)
+    
+    rect rgb(240, 240, 240)
+        Note over Logic: Middleware & Config Check:
+        Note over Logic: - Prefix & Command Parsing
+        Note over Logic: - Cooldown (config.cooldown)
+        Note over Logic: - Permission (Owner/Group)
     end
 
-    Note over Entry, WA: --- FASE READY ---
-    Bot->>Bot: Setup Event Handlers (Message, Call)
-    Bot-->>Entry: Bot Connected & Ready!
+    Logic->>Queue: Enqueue Task (FIFO)
+    Queue->>Queue: Tunggu Antrian Selesai
+    
+    Queue->>Plugin: executeCommand()
+
+    rect rgb(230, 255, 230)
+        Note over Plugin: Perilaku Manusia (Humanized):
+        Note over Plugin: 1. Random Delay (2-4s)
+        Note over Plugin: 2. Mark as Read (config.autoRead)
+        Note over Plugin: 3. Typing Simulation (config.autoTyping)
+    end
+
+    Plugin->>Socket: sendMessage (Result)
+    Socket->>WA: Kirim ke User
 ```
+
+---
+
+## ⚙️ Penggunaan Konfigurasi (Config Usage)
+
+Sistem menggunakan file `src/config/config.ts` sebagai pusat kendali perilaku bot. Beberapa fitur utama yang dikontrol melalui config:
+
+- **Anti-Spam**: `cooldown` (default 3000ms) untuk membatasi frekuensi perintah per user.
+- **Privacy & Stealth**: `autoRead` untuk centang biru otomatis dan `autoTyping` untuk simulasi mengetik yang diacak durasinya.
+- **Security**: `ownerNumber` untuk hak akses penuh dan `antiCall` untuk memblokir panggilan masuk secara otomatis.
+- **Connectivity**: `usePairingCode` dan `customPairingCode` untuk login tanpa scan QR.
+
+---
+
+## 🧩 Sistem Plugin (Plugin System)
+
+Bot mendukung dua metode pendaftaran plugin yang fleksibel:
+
+1. **Decorator-based (Modern)**: Menggunakan class dengan decorator `@Command`.
+   ```typescript
+   @Command({ name: "ping", category: "general" })
+   export default class PingCommand implements BaseCommand {
+     async execute(sock: WASocket, m: MessageData) {
+       await sock.sendMessage(m.from, { text: "Pong!" });
+     }
+   }
+   ```
+2. **Object-based (Classic)**: Export langsung objek `command`.
+   ```typescript
+   export const command: PluginCommand = {
+     name: "ping",
+     execute: async (sock, m) => { ... }
+   };
+   ```
+
+Setiap plugin yang diletakkan di `src/plugins/` akan dimuat secara otomatis saat startup dan mendukung fitur **Hot-Reload** (perubahan kode langsung diterapkan tanpa restart bot).
 
 ---
 
