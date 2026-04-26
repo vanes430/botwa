@@ -65,5 +65,55 @@ bun run start
 
 ---
 
+## 🔄 Alur Kerja Sistem (Sequence Diagram)
+
+Diagram di bawah ini menjelaskan bagaimana sebuah pesan diproses oleh sistem bot dari awal hingga eksekusi perintah:
+
+```mermaid
+sequenceDiagram
+    participant User as WhatsApp User
+    participant Socket as Baileys Socket
+    participant Upsert as Message Handler
+    participant Logic as Core Logic
+    participant Queue as Global Queue
+    participant Plugin as Plugin Module
+
+    User->>Socket: Kirim Pesan / Perintah
+    Socket->>Upsert: Event: messages.upsert
+    Upsert->>Logic: Parsing & Metadata Extraction
+    
+    rect rgb(240, 240, 240)
+        Note over Logic: Middleware Check:
+        Note over Logic: (Owner, Group, Cooldown, etc)
+    end
+
+    Logic->>Queue: Enqueue Command Task (FIFO)
+    
+    Queue->>Queue: Tunggu Antrian Sebelumnya Selesai
+    
+    Queue->>Plugin: executeCommand()
+    
+    rect rgb(230, 255, 230)
+        Note over Plugin: Human Behavior:
+        Note over Plugin: Mark Read & Typing Simulation
+    end
+
+    Plugin->>Socket: sendMessage (Response)
+    Socket->>User: Kirim Balasan ke WhatsApp
+```
+
+---
+
+## 🛠️ Siklus Pengembangan & Sistem Git
+
+Proyek ini menggunakan standar industri untuk menjaga kualitas kode:
+
+1.  **Version Control**: Menggunakan Git untuk pelacakan perubahan.
+2.  **Code Quality (Biome)**: Menggunakan Biome.js untuk linting dan formatting. Lebih cepat dari ESLint/Prettier.
+3.  **Husky Pre-commit Hook**: Setiap kali Anda menjalankan `git commit`, Husky akan otomatis menjalankan `bun run lint`. Jika ada error formatting atau linting, commit akan ditolak hingga kode diperbaiki.
+4.  **Modular Plugins**: Menambah fitur baru cukup dengan membuat file baru di `src/plugins/` menggunakan decorator `@Command`.
+
+---
+
 ## 🛠️ Maintenance
 Untuk panduan mendalam tentang cara mengembangkan plugin dan memelihara kode, silakan baca **[HOW_TO_MAINTENANCE.md](./HOW_TO_MAINTENANCE.md)**.
